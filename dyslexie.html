@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulation de la dyslexie avancée</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 26px;
+            line-height: 1.6;
+            padding: 50px;
+            background-color: #f8f8f8;
+            color: #222;
+            text-align: justify;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        .controls {
+            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .input-group {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 18px;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 18px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        textarea {
+            height: 120px;
+            resize: vertical;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, opacity 0.3s ease;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: #0056b3;
+        }
+        
+        button:disabled {
+            background-color: #aaa;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .dyslexic-text {
+            border: 2px solid #ddd;
+            padding: 20px;
+            border-radius: 8px;
+            min-height: 100px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .word {
+            display: inline-block;
+            margin-right: 8px;
+            position: relative;
+            transition: all 0.3s ease-out;
+        }
+        
+        .letter {
+            display: inline-block;
+            position: relative;
+            transition: transform 0.2s ease-out, filter 0.2s ease-out, margin 0.2s ease-out;
+        }
+
+        .flipped {
+            transform: scaleX(-1);
+        }
+
+        .jumped {
+            transform: translateY(-5px);
+        }
+
+        .crowded {
+            margin-right: -5px;
+        }
+
+        .blurred {
+            filter: blur(1.5px);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1 id="page-title">Symptomatologie de la dyslexie</h1>
+		
+        <div class="dyslexic-text">
+            <p id="simulated-text"></p>
+        </div>
+        <div class="controls">
+            <div class="buttons">
+                <button id="start-button">Démarrer la simulation</button>
+                <button id="stop-button">Arrêter la simulation</button>
+            </div>
+            <div class="input-group">
+                <label for="title-input">Titre de la page :</label>
+                <input type="text" id="title-input" value="Symptomatologie de la dyslexie" />
+            </div>
+            <div class="input-group">
+                <label for="text-input">Texte à simuler :</label>
+                <textarea id="text-input">La dyslexie peut se manifester comme production retardée du langage, difficultés d'articulation, difficultés à se rappeler les noms des lettres, des nombres et des couleurs, difficultés avec les problèmes de mots malgré des compétences normales en calcul mathématique. Ces enfants présentant des problèmes phonologiques ont souvent des difficultés à allier des sons, à faire rimer les mots, à identifier la position des sons au sein des mots et à segmenter les mots en syllabes. Ils peuvent inverser l'ordre des sons dans les mots. Les hésitations et la lenteur dans le choix des mots, les substitutions de mots, les difficultés à nommer les lettres et les images sont des signes précoces fréquents. Les troubles de la mémoire auditive à court terme et du séquençage auditif sont habituels.</textarea>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const pageTitleElement = document.getElementById('page-title');
+        const titleInput = document.getElementById('title-input');
+        const textElement = document.getElementById('simulated-text');
+        const textInput = document.getElementById('text-input');
+        const startButton = document.getElementById('start-button');
+        const stopButton = document.getElementById('stop-button');
+        let intervalId;
+
+        function createHtmlElements(element, text) {
+            const words = text.trim().split(/\s+/);
+            let htmlContent = '';
+            words.forEach(word => {
+                let lettersHtml = '';
+                for (const char of word) {
+                    lettersHtml += `<span class="letter">${char}</span>`;
+                }
+                htmlContent += `<span class="word">${lettersHtml}</span> `;
+            });
+            element.innerHTML = htmlContent;
+        }
+        
+        function applyRandomEffects() {
+            const allElements = document.querySelectorAll('.word');
+            allElements.forEach(word => {
+                const lettersInWord = word.querySelectorAll('.letter');
+                
+                if (Math.random() < 0.15 && lettersInWord.length > 2) {
+                    const middlePart = Array.from(lettersInWord).slice(1, lettersInWord.length - 1);
+                    for (let i = middlePart.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [middlePart[i].textContent, middlePart[j].textContent] = [middlePart[j].textContent, middlePart[i].textContent];
+                    }
+                }
+
+                lettersInWord.forEach(letter => {
+                    letter.className = 'letter';
+
+                    if (Math.random() < 0.05) {
+                        letter.classList.add('jumped');
+                    }
+                    
+                    if (Math.random() < 0.02) {
+                        letter.classList.add('flipped');
+                    }
+
+                    if (Math.random() < 0.03) {
+                        letter.classList.add('crowded');
+                    }
+
+                    if (Math.random() < 0.02) {
+                        letter.classList.add('blurred');
+                    }
+                });
+            });
+        }
+
+        function startSimulation() {
+            if (intervalId) {
+                clearInterval(intervalId);
+            }
+            
+            createHtmlElements(pageTitleElement, titleInput.value);
+            createHtmlElements(textElement, textInput.value);
+            
+            intervalId = setInterval(applyRandomEffects, 300);
+            
+            startButton.disabled = true;
+            stopButton.disabled = false;
+        }
+
+        function stopSimulation() {
+            if (intervalId) {
+                clearInterval(intervalId);
+            }
+            startButton.disabled = false;
+            stopButton.disabled = true;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            stopButton.disabled = true;
+            startSimulation();
+        });
+        
+        startButton.addEventListener('click', startSimulation);
+        stopButton.addEventListener('click', stopSimulation);
+    </script>
+</body>
+</html>
