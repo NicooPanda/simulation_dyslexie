@@ -52,6 +52,36 @@
             resize: vertical;
         }
 
+        input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 8px;
+            border-radius: 5px;
+            background: #d3d3d3;
+            outline: none;
+            opacity: 0.7;
+            -webkit-transition: .2s;
+            transition: opacity .2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #007BFF;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #007BFF;
+            cursor: pointer;
+        }
+
         .buttons {
             display: flex;
             gap: 15px;
@@ -123,127 +153,177 @@
 <body>
 
     <div class="container">
-        <h1 id="page-title">Symptomatologie de la dyslexie</h1>
-		
-        <div class="dyslexic-text">
-            <p id="simulated-text"></p>
-        </div>
+        <nav style="text-align: center; margin-bottom: 20px;">
+            <a href="exercice.html" style="font-size: 20px; text-decoration: none; color: #007BFF;">Accéder à l'exercice</a>
+        </nav>
+        <h1 id="page-title">Simulation de la dyslexie</h1>
         <div class="controls">
+            <div class="input-group">
+                <label for="title-input">Titre de la page :</label>
+                <input type="text" id="title-input" value="Simulation de la dyslexie" />
+            </div>
+            <div class="input-group">
+                <label for="text-input">Texte à simuler :</label>
+                <textarea id="text-input">Ce texte illustre les nombreux obstacles visuels que les personnes dyslexiques peuvent rencontrer. Les lettres peuvent se mélanger, bouger, ou se retourner, rendant la reconnaissance des mots complexe. L'ensemble de la page peut sembler désorganisé et la lecture nécessite un effort constant et une concentration intense. Ce sont ces défis qui expliquent la lenteur de la lecture et la fatigue que cela génère.</textarea>
+            </div>
+            <div class="input-group">
+                <label for="speed-slider">Vitesse des effets : <span id="speed-value">Moyenne</span></label>
+                <input type="range" id="speed-slider" min="1" max="100" value="50" />
+            </div>
             <div class="buttons">
                 <button id="start-button">Démarrer la simulation</button>
                 <button id="stop-button">Arrêter la simulation</button>
             </div>
-			<div class="input-group">
-    			<label for="speed-slider">Vitesse des effets (ms) : <span id="speed-value">300</span></label>
-    			<input type="range" id="speed-slider" min="50" max="1000" value="300" />
-			</div>
-            <div class="input-group">
-                <label for="title-input">Titre de la page :</label>
-                <input type="text" id="title-input" value="Symptomatologie de la dyslexie" />
-            </div>
-            <div class="input-group">
-                <label for="text-input">Texte à simuler :</label>
-                <textarea id="text-input">La dyslexie peut se manifester comme production retardée du langage, difficultés d'articulation, difficultés à se rappeler les noms des lettres, des nombres et des couleurs, difficultés avec les problèmes de mots malgré des compétences normales en calcul mathématique. Ces enfants présentant des problèmes phonologiques ont souvent des difficultés à allier des sons, à faire rimer les mots, à identifier la position des sons au sein des mots et à segmenter les mots en syllabes. Ils peuvent inverser l'ordre des sons dans les mots. Les hésitations et la lenteur dans le choix des mots, les substitutions de mots, les difficultés à nommer les lettres et les images sont des signes précoces fréquents. Les troubles de la mémoire auditive à court terme et du séquençage auditif sont habituels.</textarea>
-            </div>
         </div>
 
+        <div class="dyslexic-text">
+            <p id="simulated-text"></p>
+        </div>
     </div>
 
     <script>
-       const pageTitleElement = document.getElementById('page-title');
-		const titleInput = document.getElementById('title-input');
-		const textElement = document.getElementById('simulated-text');
-		const textInput = document.getElementById('text-input');
-		const startButton = document.getElementById('start-button');
-		const stopButton = document.getElementById('stop-button');
-		const speedSlider = document.getElementById('speed-slider');
-		const speedValueSpan = document.getElementById('speed-value');
-		let intervalId;
-		
-		function createHtmlElements(element, text) {
-		    const words = text.trim().split(/\s+/);
-		    let htmlContent = '';
-		    words.forEach(word => {
-		        let lettersHtml = '';
-		        for (const char of word) {
-		            lettersHtml += `<span class="letter">${char}</span>`;
-		        }
-		        htmlContent += `<span class="word">${lettersHtml}</span> `;
-		    });
-		    element.innerHTML = htmlContent;
-		}
-		
-		function applyRandomEffects() {
-		    const allElements = document.querySelectorAll('.word, #page-title .word');
-		    allElements.forEach(word => {
-		        const lettersInWord = word.querySelectorAll('.letter');
-		
-		        if (Math.random() < 0.15 && lettersInWord.length > 2) {
-		            const middlePart = Array.from(lettersInWord).slice(1, lettersInWord.length - 1);
-		            for (let i = middlePart.length - 1; i > 0; i--) {
-		                const j = Math.floor(Math.random() * (i + 1));
-		                [middlePart[i].textContent, middlePart[j].textContent] = [middlePart[j].textContent, middlePart[i].textContent];
-		            }
-		        }
-		
-		        lettersInWord.forEach(letter => {
-		            letter.className = 'letter';
-		
-		            if (Math.random() < 0.05) {
-		                letter.classList.add('jumped');
-		            }
-		
-		            if (Math.random() < 0.02) {
-		                letter.classList.add('flipped');
-		            }
-		
-		            if (Math.random() < 0.03) {
-		                letter.classList.add('crowded');
-		            }
-		
-		            if (Math.random() < 0.02) {
-		                letter.classList.add('blurred');
-		            }
-		        });
-		    });
-		}
-		
-		function startSimulation() {
-		    if (intervalId) {
-		        clearInterval(intervalId);
-		    }
-		    const speed = speedSlider.value; // Lit la valeur du curseur
-		    createHtmlElements(pageTitleElement, titleInput.value);
-		    createHtmlElements(textElement, textInput.value);
-		    
-		    // Utilise la valeur du curseur pour le délai de l'intervalle
-		    intervalId = setInterval(applyRandomEffects, speed);
-		
-		    startButton.disabled = true;
-		    stopButton.disabled = false;
-		}
-		
-		function stopSimulation() {
-		    if (intervalId) {
-		        clearInterval(intervalId);
-		    }
-		    startButton.disabled = false;
-		    stopButton.disabled = true;
-		}
-		
-		// Met à jour l'affichage de la valeur du curseur
-		speedSlider.addEventListener('input', () => {
-		    speedValueSpan.textContent = speedSlider.value;
-		});
-		
-		// Gère le démarrage initial et le clic sur les boutons
-		document.addEventListener('DOMContentLoaded', () => {
-		    stopButton.disabled = true;
-		    startSimulation();
-		});
-		
-		startButton.addEventListener('click', startSimulation);
-		stopButton.addEventListener('click', stopSimulation);
+        const pageTitleElement = document.getElementById('page-title');
+        const titleInput = document.getElementById('title-input');
+        const textElement = document.getElementById('simulated-text');
+        const textInput = document.getElementById('text-input');
+        const startButton = document.getElementById('start-button');
+        const stopButton = document.getElementById('stop-button');
+        const speedSlider = document.getElementById('speed-slider');
+        const speedValueSpan = document.getElementById('speed-value');
+        let intervalId;
+
+        // Mappage des valeurs du slider à des libellés de vitesse pour une meilleure UX
+        const speedLabels = {
+            '1': 'Très lente', '10': 'Lente', '30': 'Modérée', '50': 'Moyenne',
+            '70': 'Rapide', '90': 'Très rapide', '100': 'Extrême'
+        };
+
+        function getIntervalDelay(sliderValue) {
+            // Inverser la logique : plus la valeur du slider est grande, plus le délai est petit (plus rapide)
+            // Range du slider: 1 à 100
+            // Range de délai souhaité: 50ms (très rapide) à 1000ms (très lente)
+            // Formule: max_delay - ((slider_value - min_slider_value) / (max_slider_value - min_slider_value)) * (max_delay - min_delay)
+            const minSlider = 1;
+            const maxSlider = 100;
+            const minDelay = 50; // Délai le plus court (le plus rapide)
+            const maxDelay = 1000; // Délai le plus long (le plus lent)
+
+            return maxDelay - ((sliderValue - minSlider) / (maxSlider - minSlider)) * (maxDelay - minDelay);
+        }
+
+        function createHtmlElements(element, text) {
+            const words = text.trim().split(/\s+/);
+            let htmlContent = '';
+            words.forEach(word => {
+                let lettersHtml = '';
+                for (const char of word) {
+                    lettersHtml += `<span class="letter">${char}</span>`;
+                }
+                htmlContent += `<span class="word">${lettersHtml}</span> `;
+            });
+            element.innerHTML = htmlContent;
+        }
+        
+        function applyRandomEffects() {
+            // Sélectionne tous les mots, y compris ceux du titre
+            const allElements = document.querySelectorAll('.word, #page-title .word'); 
+            allElements.forEach(word => {
+                const lettersInWord = word.querySelectorAll('.letter');
+                
+                // Effet de mélange (scrambling)
+                if (Math.random() < 0.15 && lettersInWord.length > 2) {
+                    const middlePart = Array.from(lettersInWord).slice(1, lettersInWord.length - 1);
+                    // Shuffle Fisher-Yates pour le milieu du mot
+                    for (let i = middlePart.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [middlePart[i].textContent, middlePart[j].textContent] = [middlePart[j].textContent, middlePart[i].textContent];
+                    }
+                }
+
+                lettersInWord.forEach(letter => {
+                    letter.className = 'letter'; // Réinitialise les classes à chaque cycle
+
+                    // Effet de saut (jumping)
+                    if (Math.random() < 0.05) {
+                        letter.classList.add('jumped');
+                    }
+                    
+                    // Effet de retournement (flipping)
+                    if (Math.random() < 0.02) {
+                        letter.classList.add('flipped');
+                    }
+
+                    // Effet de chevauchement (crowding)
+                    if (Math.random() < 0.03) {
+                        letter.classList.add('crowded');
+                    }
+
+                    // Effet de flou (blurring)
+                    if (Math.random() < 0.02) {
+                        letter.classList.add('blurred');
+                    }
+                });
+            });
+        }
+
+        function startSimulation() {
+            if (intervalId) {
+                clearInterval(intervalId);
+            }
+            
+            const currentSpeedValue = parseInt(speedSlider.value);
+            const delay = getIntervalDelay(currentSpeedValue);
+
+            createHtmlElements(pageTitleElement, titleInput.value);
+            createHtmlElements(textElement, textInput.value);
+            
+            intervalId = setInterval(applyRandomEffects, delay);
+            
+            startButton.disabled = true;
+            stopButton.disabled = false;
+        }
+
+        function stopSimulation() {
+            if (intervalId) {
+                clearInterval(intervalId);
+            }
+            startButton.disabled = false;
+            stopButton.disabled = true;
+        }
+
+        // Met à jour l'affichage de la valeur du curseur
+        speedSlider.addEventListener('input', () => {
+            const sliderValue = parseInt(speedSlider.value);
+            // Trouver le libellé le plus proche ou exact
+            let label = speedLabels[sliderValue] || 'Personnalisée';
+            
+            // Si la valeur est entre deux étiquettes, on peut donner une indication
+            if (label === 'Personnalisée') {
+                const closestValue = Object.keys(speedLabels).reduce((prev, curr) => 
+                    (Math.abs(curr - sliderValue) < Math.abs(prev - sliderValue) ? curr : prev)
+                );
+                if (Math.abs(closestValue - sliderValue) < 10) { // Si proche d'une étiquette existante
+                    label = `~${speedLabels[closestValue]}`;
+                } else {
+                    label = `${getIntervalDelay(sliderValue).toFixed(0)} ms`;
+                }
+            }
+
+            speedValueSpan.textContent = label;
+            // Relancer la simulation immédiatement avec la nouvelle vitesse
+            startSimulation(); 
+        });
+
+        // Gère le démarrage initial et le clic sur les boutons
+        document.addEventListener('DOMContentLoaded', () => {
+            stopButton.disabled = true;
+            // Initialise le libellé de vitesse au chargement
+            speedValueSpan.textContent = speedLabels[speedSlider.value] || 'Moyenne';
+            startSimulation();
+        });
+
+        startButton.addEventListener('click', startSimulation);
+        stopButton.addEventListener('click', stopSimulation);
     </script>
 </body>
 </html>
